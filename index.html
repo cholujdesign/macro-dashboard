@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MACRO//SIGNAL — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #07090c;
+  --bg2:     #0c0f14;
+  --bg3:     #131820;
+  --bg4:     #1a2030;
+  --line:    #1e2530;
+  --green:   #00d084;
+  --green2:  #003d22;
+  --amber:   #f0a500;
+  --amber2:  #3d2800;
+  --red:     #ff4455;
+  --red2:    #3d0810;
+  --blue:    #4a9eff;
+  --blue2:   #0a2040;
+  --muted:   #4a5568;
+  --dim:     #6b7a8d;
+  --text:    #c8d3e0;
+  --bright:  #e8f0f8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+/* ─── HEADER ─── */
+.header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(7,9,12,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: 0 20px;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.h-brand {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.h-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--bright);
+}
+
+.h-logo span { color: var(--green); }
+
+.h-sep { width: 1px; height: 18px; background: var(--line); }
+
+.h-sub {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.h-live {
+  display: flex; align-items: center; gap: 16px;
+}
+
+.live-chip {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px;
+}
+
+.live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 2.5s infinite;
+}
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.live-lbl { color: var(--muted); font-size: 9px; letter-spacing: 1px; }
+.live-val { color: var(--bright); font-weight: 700; }
+.live-chg { font-size: 10px; }
+.up { color: var(--green); }
+.dn { color: var(--red); }
+
+/* ─── FRED KEY BAR ─── */
+.apibar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 20px;
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+
+.apibar-label { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+
+.apibar-input {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  width: 280px;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.apibar-input:focus { border-color: var(--blue); }
+.apibar-input::placeholder { color: var(--muted); opacity: .6; }
+
+.btn {
+  padding: 4px 12px;
+  border-radius: 3px;
+  border: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .15s;
+}
+
+.btn-green { background: var(--green2); color: var(--green); border: 1px solid var(--green); }
+.btn-green:hover { background: var(--green); color: var(--bg); }
+
+.btn-dim { background: var(--bg3); color: var(--dim); border: 1px solid var(--line); }
+.btn-dim:hover { border-color: var(--dim); color: var(--text); }
+
+.apibar-note {
+  font-size: 9px; color: var(--muted);
+  margin-left: auto;
+}
+
+.apibar-note a { color: var(--blue); text-decoration: none; }
+.apibar-note a:hover { text-decoration: underline; }
+
+/* ─── SUMMARY BAR ─── */
+.summary {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 24px;
+  flex-wrap: wrap;
+}
+
+.s-title { font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+.s-counts { display: flex; gap: 16px; }
+
+.s-count {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700;
+}
+
+.s-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+.s-ts { font-size: 9px; color: var(--muted); margin-left: auto; }
+
+/* ─── MAIN ─── */
+.main { max-width: 1440px; margin: 0 auto; padding: 20px 16px 60px; }
+
+/* ─── TIER ─── */
+.tier { margin-bottom: 28px; }
+
+.tier-hd {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 0 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tier-pill {
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 2px;
+}
+
+.t1 .tier-pill { background: var(--red2); color: var(--red); border: 1px solid var(--red); }
+.t2 .tier-pill { background: var(--amber2); color: var(--amber); border: 1px solid var(--amber); }
+.t3 .tier-pill { background: var(--blue2); color: var(--blue); border: 1px solid var(--blue); }
+.t4 .tier-pill { background: #1a2f1a; color: var(--green); border: 1px solid var(--green); }
+.t5 .tier-pill { background: #1a1228; color: #a78bfa; border: 1px solid #a78bfa; }
+
+.tier-name { font-size: 11px; color: var(--dim); letter-spacing: .5px; }
+
+/* ─── GRID ─── */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+
+/* ─── CARD ─── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 13px 14px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: transparent;
+  transition: background .2s;
+}
+
+.card:hover { border-color: #2a3545; }
+.card.open { border-color: #2a4060; background: var(--bg3); }
+.card.open::before { background: var(--blue); }
+
+.card-status-alert::before { background: var(--red) !important; }
+.card-status-warn::before { background: var(--amber) !important; }
+.card-status-ok::before { background: var(--green) !important; }
+
+.ct { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+
+.cn { font-size: 12px; font-weight: 700; color: var(--bright); flex: 1; line-height: 1.3; }
+
+.cs {
+  padding: 3px 9px; border-radius: 2px;
+  font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; white-space: nowrap;
+  border: 1px solid; cursor: pointer;
+  transition: all .15s;
+}
+
+.cs:hover { filter: brightness(1.2); }
+
+.s-none { background: var(--bg4); color: var(--muted); border-color: var(--line); }
+.s-ok   { background: var(--green2); color: var(--green); border-color: var(--green); }
+.s-warn { background: var(--amber2); color: var(--amber); border-color: var(--amber); }
+.s-alert{ background: var(--red2); color: var(--red); border-color: var(--red); }
+
+.cw { font-size: 10px; color: var(--dim); line-height: 1.5; margin-bottom: 6px; font-family: 'Syne', sans-serif; font-weight: 400; }
+
+.cf { display: flex; justify-content: space-between; align-items: center; }
+
+.cf-freq { font-size: 8px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+.cf-src { font-size: 8px; color: var(--blue); text-decoration: none; opacity: .7; }
+.cf-src:hover { opacity: 1; }
+
+.hint { font-size: 8px; color: var(--muted); opacity: .4; text-align: right; margin-top: 3px; letter-spacing: .3px; }
+
+/* ─── EXPANDED ─── */
+.expand-body { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.card.open .expand-body { display: block; }
+
+.thresholds { margin-bottom: 10px; }
+
+.thr {
+  display: flex; gap: 7px; margin-bottom: 5px; align-items: flex-start;
+}
+
+.thr-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+
+.thr-txt { font-size: 10px; color: var(--text); line-height: 1.4; font-family: 'Syne', sans-serif; }
+
+.note-wrap { position: relative; }
+
+.note-label { font-size: 8px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+
+.note-ta {
+  width: 100%; height: 56px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 6px 8px;
+  resize: none; outline: none;
+  transition: border-color .2s;
+}
+
+.note-ta:focus { border-color: var(--blue); }
+.note-ta::placeholder { color: var(--muted); opacity: .4; }
+
+/* ─── LIVE TABLE ─── */
+.live-table {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.lt-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg3);
+}
+
+.lt-title { font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+.lt-ts { font-size: 9px; color: var(--muted); margin-left: auto; }
+
+.lt-row {
+  display: flex; align-items: center;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  gap: 12px;
+  transition: background .15s;
+}
+
+.lt-row:last-child { border-bottom: none; }
+.lt-row:hover { background: var(--bg3); }
+
+.lt-name { font-size: 10px; color: var(--dim); width: 160px; flex-shrink: 0; letter-spacing: .3px; }
+
+.lt-val { font-size: 13px; font-weight: 700; color: var(--bright); min-width: 100px; }
+
+.lt-chg { font-size: 10px; min-width: 70px; }
+
+.lt-bar-wrap { flex: 1; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+
+.lt-bar { height: 100%; border-radius: 2px; transition: width .5s; }
+
+.lt-alert {
+  font-size: 8px; font-weight: 700; letter-spacing: 1px;
+  padding: 2px 7px; border-radius: 2px;
+  margin-left: auto;
+}
+
+.la-none { background: var(--bg4); color: var(--muted); }
+.la-ok   { background: var(--green2); color: var(--green); }
+.la-warn { background: var(--amber2); color: var(--amber); }
+.la-alert{ background: var(--red2); color: var(--red); }
+
+/* ─── CALENDAR ─── */
+.cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+
+.cal-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+
+.cal-freq { font-size: 8px; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 7px; }
+
+.cal-item { font-size: 10px; color: var(--dim); padding: 2px 0; }
+
+/* ─── MOBILE ─── */
+@media (max-width: 600px) {
+  .h-live { display: none; }
+  .apibar-input { width: 180px; }
+  .cards { grid-template-columns: 1fr; }
+  .lt-bar-wrap { display: none; }
+  .lt-name { width: 120px; font-size: 9px; }
+  .lt-val { min-width: 80px; font-size: 12px; }
+  .apibar-note { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="h-brand">
+    <div class="h-logo">MACRO<span>//</span>SIGNAL</div>
+    <div class="h-sep"></div>
+    <div class="h-sub">2026 Intelligence Dashboard</div>
+  </div>
+  <div class="h-live" id="hLive">
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      <span class="live-lbl">BTC</span>
+      <span class="live-val" id="hBtc">—</span>
+      <span class="live-chg" id="hBtcC">—</span>
+    </div>
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      <span class="live-lbl">GOLD</span>
+      <span class="live-val" id="hGold">—</span>
+    </div>
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      <span class="live-lbl">10Y</span>
+      <span class="live-val" id="h10y">—</span>
+    </div>
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      <span class="live-lbl">HY SPR</span>
+      <span class="live-val" id="hHy">—</span>
+    </div>
+  </div>
+</header>
+
+<!-- FRED API KEY BAR -->
+<div class="apibar">
+  <span class="apibar-label">FRED API KEY</span>
+  <input class="apibar-input" id="fredKey" type="text" placeholder="Wpisz klucz FRED (bezpłatny)" autocomplete="off">
+  <button class="btn btn-green" onclick="saveKeyAndRefresh()">↻ ODŚWIEŻ</button>
+  <button class="btn btn-dim" onclick="refreshAll()">AUTO</button>
+  <span class="apibar-note">
+    Bezpłatny klucz: <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank">fred.stlouisfed.org →</a>
+    &nbsp;|&nbsp; BTC/Gold live automatycznie
+  </span>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <span class="s-title">STATUS SYSTEMU</span>
+  <div class="s-counts">
+    <div class="s-count"><div class="s-dot" style="background:var(--red)"></div><span id="cntA">0</span>&nbsp;ALERT</div>
+    <div class="s-count"><div class="s-dot" style="background:var(--amber)"></div><span id="cntW">0</span>&nbsp;UWAGA</div>
+    <div class="s-count"><div class="s-dot" style="background:var(--green)"></div><span id="cntO">0</span>&nbsp;OK</div>
+    <div class="s-count"><div class="s-dot" style="background:var(--muted)"></div><span id="cntN">0</span>&nbsp;—</div>
+  </div>
+  <span class="s-ts" id="sTs">—</span>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LIVE DATA TABLE -->
+  <div class="live-table">
+    <div class="lt-header">
+      <span class="lt-title">LIVE DATA</span>
+      <div class="live-dot"></div>
+      <span class="lt-ts" id="ltTs">odświeżanie...</span>
+    </div>
+    <div id="liveRows"></div>
+  </div>
+
+  <!-- SIGNAL TIERS -->
+  <div id="tiersRoot"></div>
+
+  <!-- CALENDAR -->
+  <div class="tier">
+    <div class="tier-hd" style="border-color:#2a3040">
+      <span class="tier-pill" style="background:#1a2030;color:#8892a0;border-color:#2a3545">KALENDARZ</span>
+      <span class="tier-name">Co i kiedy sprawdzać</span>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-card">
+        <div class="cal-freq">Codziennie</div>
+        <div class="cal-item">• 10Y Treasury Yield</div>
+        <div class="cal-item">• DXY Dollar Index</div>
+        <div class="cal-item">• Ropa Brent</div>
+        <div class="cal-item">• BTC Dominance</div>
+        <div class="cal-item">• Iran war updates</div>
+      </div>
+      <div class="cal-card">
+        <div class="cal-freq">Tygodniowo</div>
+        <div class="cal-item">• HY Credit Spread</div>
+        <div class="cal-item">• Gold ETF flows</div>
+        <div class="cal-item">• Fed speakers</div>
+        <div class="cal-item">• Epstein releases</div>
+        <div class="cal-item">• Gold/Oil ratio</div>
+      </div>
+      <div class="cal-card">
+        <div class="cal-freq">Miesięcznie</div>
+        <div class="cal-item">• CPI/PCE USA + EU</div>
+        <div class="cal-item">• TIC data Treasuries</div>
+        <div class="cal-item">• PBOC rezerwy złota</div>
+        <div class="cal-item">• NFP payrolls</div>
+        <div class="cal-item">• BTC NUPL on-chain</div>
+      </div>
+      <div class="cal-card">
+        <div class="cal-freq">Kwartalnie</div>
+        <div class="cal-item">• IMF COFER (waluty)</div>
+        <div class="cal-item">• GDP USA + EU</div>
+        <div class="cal-item">• Wyniki banków EU</div>
+        <div class="cal-item">• Fed dot plot</div>
+        <div class="cal-item">• mBridge wolumen</div>
+      </div>
+      <div class="cal-card">
+        <div class="cal-freq">Jednorazowo</div>
+        <div class="cal-item">• SpaceX S-1 (kwiecień/maj)</div>
+        <div class="cal-item">• Warsh vote Senat</div>
+        <div class="cal-item">• Iran format zakończenia</div>
+        <div class="cal-item">• Midtermy XI 2026</div>
+        <div class="cal-item">• SpaceX Q1 wyniki XII 2026</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ─── DATA DEFINITIONS ───────────────────────────────────────
+
+const LIVE_DEFS = [
+  { id:'btc', label:'BTC / USD', unit:'$', source:'CoinGecko',
+    thresholds:[{v:50000,lbl:'<50k',cls:'la-warn'},{v:30000,lbl:'<30k',cls:'la-alert'}],
+    url:'https://coinbase.com/' },
+  { id:'gold', label:'Gold spot USD/oz', unit:'$', source:'metals.live',
+    thresholds:[{v:5500,lbl:'>5500',cls:'la-warn'},{v:6000,lbl:'>6000',cls:'la-alert'}],
+    url:'https://www.tradingview.com/symbols/XAUUSD/' },
+  { id:'y10', label:'10Y Treasury Yield', unit:'%', source:'FRED: DGS10',
+    thresholds:[{v:5.0,lbl:'>5%',cls:'la-warn'},{v:5.5,lbl:'>5.5%',cls:'la-alert'}],
+    url:'https://fred.stlouisfed.org/series/DGS10' },
+  { id:'y2', label:'2Y Treasury Yield', unit:'%', source:'FRED: DGS2',
+    thresholds:[], url:'https://fred.stlouisfed.org/series/DGS2' },
+  { id:'spread', label:'Spread 10Y-2Y', unit:'%', source:'Obliczenia',
+    thresholds:[{v:0,lbl:'<0 odwrócona',cls:'la-alert'}], computed:true,
+    url:'https://fred.stlouisfed.org/series/T10Y2Y' },
+  { id:'hy', label:'HY Credit Spread', unit:'%', source:'FRED: BAMLH0A0HYM2EY',
+    thresholds:[{v:5.0,lbl:'>500bps',cls:'la-warn'},{v:6.0,lbl:'>600bps',cls:'la-alert'}],
+    url:'https://fred.stlouisfed.org/series/BAMLH0A0HYM2EY' },
+];
+
+const TIERS = [
+  {
+    cls:'t1', pill:'TIER 1', name:'Sygnały krytyczne — obserwuj codziennie',
+    cards:[
+      { id:'c_10y', name:'10Y Treasury Yield',
+        why:'Termometr całego systemu. Wszystkie inne wskaźniki są pochodną.',
+        freq:'CODZIENNIE', src:'https://fred.stlouisfed.org/series/DGS10', srcl:'FRED',
+        thresholds:[
+          {c:'var(--red)',t:'>5.5% → pętla długu bez wyjścia. Cięcia lub monetyzacja jedyną opcją'},
+          {c:'var(--amber)',t:'>5.0% i rosnące przy słabym wzroście → stagflacja, Fed traci kontrolę'},
+          {c:'var(--green)',t:'<4.0% i spadające → deeskalacja, Fed pivotuje, relief rally możliwy'},
+        ]},
+      { id:'c_dxy', name:'DXY Dollar Index',
+        why:'Siła dolara. Kluczowy dla hegemonii USD i wyceny złota.',
+        freq:'CODZIENNIE', src:'https://www.tradingview.com/symbols/TVC-DXY/', srcl:'TradingView',
+        thresholds:[
+          {c:'var(--red)',t:'Słaby DXY + rosnące rentowności JEDNOCZEŚNIE → sprzedają obligacje I walutę. Koniec hegemonii'},
+          {c:'var(--amber)',t:'Silny DXY + rosnące rentowności → flight to safety, system jeszcze działa'},
+        ]},
+      { id:'c_spread', name:'Spread 2Y/10Y (krzywa dochodowości)',
+        why:'Odwrócona krzywa = recesja w drodze. Normalizacja = transition moment.',
+        freq:'CODZIENNIE', src:'https://fred.stlouisfed.org/series/T10Y2Y', srcl:'FRED',
+        thresholds:[
+          {c:'var(--red)',t:'Głęboko ujemna (<-0.5%) → recesja niemal pewna w 6-12 miesięcy'},
+          {c:'var(--amber)',t:'Normalizuje się do 0 → obserwuj uważnie, transition moment'},
+          {c:'var(--green)',t:'Stromo pozytywna (>1%) → ekspansja, liquidity wraca'},
+        ]},
+      { id:'c_gold_spx', name:'Gold / S&P500 Ratio',
+        why:'Złoto outperformuje akcje = niepewność systemowa dominuje nad wzrostem korporacyjnym.',
+        freq:'TYGODNIOWO', src:'https://www.macrotrends.net/1437/gold-to-sp500-ratio', srcl:'MacroTrends',
+        thresholds:[
+          {c:'var(--red)',t:'Trend rosnący przez 3-5 lat → strukturalne środowisko real assets > financial assets'},
+          {c:'var(--green)',t:'Trend spadający → QE działa, system się bronił, akcje wracają do łask'},
+        ]},
+    ]
+  },
+  {
+    cls:'t2', pill:'TIER 2', name:'Polityczne triggery — każda zmiana może być game changer',
+    cards:[
+      { id:'c_warsh', name:'Warsh — potwierdzenie przez Senat',
+        why:'Fed oficjalnie pod kontrolą polityczną. Jeden głos zmienia całą mapę aktywów.',
+        freq:'NA BIEŻĄCO', src:'https://www.congress.gov/', srcl:'Congress.gov',
+        thresholds:[
+          {c:'var(--red)',t:'Potwierdzony → Fed nie jest już niezależny. Złoto i BTC zyskują tezę strukturalną'},
+          {c:'var(--amber)',t:'Zablokowany → Powell zostaje, niepewność monetarna przedłuża się'},
+          {c:'var(--amber)',t:'Opóźnienie past maja → constitutional gray area, bezprecedensowe'},
+        ]},
+      { id:'c_iran', name:'Iran — format zakończenia',
+        why:'Trzy scenariusze z trzema różnymi implikacjami. Obserwuj ruch wojsk, nie słowa Trumpa.',
+        freq:'CODZIENNIE', src:'https://www.bbc.com/news/world/middle_east', srcl:'BBC Middle East',
+        thresholds:[
+          {c:'var(--green)',t:'"Zwycięstwo" przed czerwcem → ropa spada, rynki rally, BTC spike, SpaceX IPO przy szczycie'},
+          {c:'var(--amber)',t:'Zamrożony konflikt → stagflacja długoterminowa, midtermy złe dla GOP'},
+          {c:'var(--red)',t:'Eskalacja lądowa → czarny łabędź. Ropa 150+. Recesja globalna pewna'},
+        ]},
+      { id:'c_mid', name:'Midtermy USA — margins (XI 2026)',
+        why:'Nie wynik — proporcja głosów do miejsc. Test czy gerrymandering na danych DOGE zadziałał.',
+        freq:'LISTOPAD 2026', src:'https://ballotpedia.org/', srcl:'Ballotpedia',
+        thresholds:[
+          {c:'var(--red)',t:'GOP wygrywa przy 55%+ głosów dla Demokratów → system przestał działać jako demokracja'},
+          {c:'var(--amber)',t:'Demokraci wygrywają z małą przewagą miejsc mimo dużej głosów → gerrymandering zadziałał'},
+          {c:'var(--green)',t:'Proporcjonalny wynik → system bronił się mechanizmem wyborczym'},
+        ]},
+      { id:'c_epstein', name:'Epstein — kolejne paczki dokumentów',
+        why:'2.5M dokumentów nieujawnionych. DOJ pod Blanche\'m = selektywne ujawnianie jako broń.',
+        freq:'NA BIEŻĄCO', src:'https://www.justice.gov/epstein-files', srcl:'DOJ Epstein Files',
+        thresholds:[
+          {c:'var(--red)',t:'Ktoś z PayPal Mafii głębiej niż wiadomo → projekt traci legitymizację u własnej bazy'},
+          {c:'var(--amber)',t:'Dalsze rezygnacje w Europie → destabilizacja sojuszników, UK pod presją'},
+          {c:'var(--amber)',t:'Blokada ujawnień → potwierdzenie instrumentalizacji DOJ'},
+        ]},
+      { id:'c_spacex', name:'SpaceX S-1 — przeczytaj uważnie (kwiecień/maj)',
+        why:'Marże Starlink, koszty xAI merger, redagowane kontrakty wojskowe. Mówi więcej niż analizy.',
+        freq:'JEDNORAZOWO', src:'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=spacex', srcl:'SEC EDGAR',
+        thresholds:[
+          {c:'var(--red)',t:'Marże Starlink <30% → wycena 1.75T jest absurdalna, nie wchodź w IPO'},
+          {c:'var(--amber)',t:'Marże 30-50% → solidna spółka ale wycena premium za "misję"'},
+          {c:'var(--green)',t:'Marże >50% + rosnący ARR → fundamenty są, ale i tak czekaj na post-lockup (XII 2026)'},
+        ]},
+    ]
+  },
+  {
+    cls:'t3', pill:'TIER 3', name:'Rynkowe sygnały wyprzedzające',
+    cards:[
+      { id:'c_hy', name:'HY Credit Spread',
+        why:'Wyprzedza recesję o 6-9 miesięcy. Gwałtowny wzrost = coś pęka w private credit lub CRE.',
+        freq:'TYGODNIOWO', src:'https://fred.stlouisfed.org/series/BAMLH0A0HYM2EY', srcl:'FRED',
+        thresholds:[
+          {c:'var(--red)',t:'>600bps i rosnące tygodniami → fale bankructw korporacyjnych w drodze'},
+          {c:'var(--amber)',t:'300-500bps → elevated risk, rynek wycenia stres'},
+          {c:'var(--green)',t:'<250bps → rynek kredytowy funkcjonuje normalnie'},
+        ]},
+      { id:'c_btcdom', name:'Bitcoin Dominance',
+        why:'Rośnie przy spadającym rynku = smart money akumuluje BTC. Spada = altseason = szczyt blisko.',
+        freq:'CODZIENNIE', src:'https://coinmarketcap.com/charts/', srcl:'CoinMarketCap',
+        thresholds:[
+          {c:'var(--amber)',t:'>65% i rosnące → bear market, ale instytucjonalna akumulacja BTC'},
+          {c:'var(--red)',t:'Gwałtowny spadek <40% → altseason, retail FOMO, szczyt cyklu blisko'},
+          {c:'var(--green)',t:'Stabilne 50-55% → zdrowy rynek, brak skrajności'},
+        ]},
+      { id:'c_nupl', name:'BTC NUPL (Net Unrealized P/L)',
+        why:'Mierzy czy rynek jest w zysku czy stracie. Kluczowy dla timingu cyklu halvingowego.',
+        freq:'TYGODNIOWO', src:'https://glassnode.com/metrics/market/net-unrealized-profit-loss', srcl:'Glassnode',
+        thresholds:[
+          {c:'var(--red)',t:'>0.75 (euforia) → szczyt cyklu blisko, smart money sprzedaje'},
+          {c:'var(--amber)',t:'0.25-0.75 → bull market w toku, obserwuj'},
+          {c:'var(--green)',t:'<0.25 (strach) lub ujemny → dołek cyklu, historycznie najlepsza okazja'},
+        ]},
+      { id:'c_goil', name:'Gold / Oil Ratio',
+        why:'Norma: 20-25 baryłek ropy za uncję złota. Odchylenia mówią o naturze kryzysu.',
+        freq:'TYGODNIOWO', src:'https://www.macrotrends.net/1380/gold-to-oil-ratio', srcl:'MacroTrends',
+        thresholds:[
+          {c:'var(--amber)',t:'Ratio spada drastycznie → ropa drożeje szybciej niż złoto, premia wojenna dominuje'},
+          {c:'var(--red)',t:'Ratio rośnie dramatycznie → złoto drożeje szybciej niż ropa = erozja dolara, nie tylko energetyka'},
+        ]},
+    ]
+  },
+  {
+    cls:'t4', pill:'TIER 4', name:'Chińskie i azjatyckie sygnały',
+    cards:[
+      { id:'c_cny', name:'Yuan / USD (CNH offshore)',
+        why:'Sygnał o intencjach Pekinu wobec decoupling. Dewaluacja = Chiny optymalizują bez oglądania na Zachód.',
+        freq:'TYGODNIOWO', src:'https://www.bloomberg.com/quote/USDCNH:CUR', srcl:'Bloomberg',
+        thresholds:[
+          {c:'var(--red)',t:'Gwałtowna dewaluacja >5% → decoupling nieunikniony, Chiny wybrały stronę'},
+          {c:'var(--amber)',t:'Kosztowna obrona juana → coś ważnego dzieje się politycznie'},
+        ]},
+      { id:'c_tic', name:'Chiny — zakupy/sprzedaż Treasuries (TIC)',
+        why:'Systematyczna sprzedaż = strategiczne wyjście z dolara. Publikowane miesięcznie przez US Treasury.',
+        freq:'MIESIĘCZNIE', src:'https://ticdata.treasury.gov/', srcl:'US Treasury TIC',
+        thresholds:[
+          {c:'var(--red)',t:'Systematyczna sprzedaż >$10B/miesiąc przez 3+ miesiące → strategiczne wyjście'},
+          {c:'var(--amber)',t:'Oscylacje bez trendu → normalne zarządzanie rezerwami'},
+        ]},
+      { id:'c_pboc', name:'PBOC — rezerwy złota',
+        why:'Banki centralne globalnego południa kupują złoto zamiast Treasuries. Strategiczny sygnał dedolaryzacji.',
+        freq:'MIESIĘCZNIE', src:'https://www.gold.org/goldhub/data/gold-reserves-by-country', srcl:'World Gold Council',
+        thresholds:[
+          {c:'var(--red)',t:'Przyspieszony zakup >10T/miesiąc przez kwartał → dedolaryzacja w fazie akceleracji'},
+          {c:'var(--amber)',t:'Stabilne zakupy 2-5T/miesiąc → trend kontynuowany, normalne tempo'},
+        ]},
+    ]
+  },
+  {
+    cls:'t5', pill:'TIER 5', name:'Sygnały długoterminowe — zmieniają się wolno ale nieodwracalnie',
+    cards:[
+      { id:'c_cofer', name:'IMF COFER — udział dolara w rezerwach',
+        why:'Najważniejszy długoterminowy sygnał. Teraz ~58%. Każdy procent w dół to biliony przepływające poza USD.',
+        freq:'KWARTALNIE', src:'https://data.imf.org/?sk=E6A5F467-C14B-4AA8-9F6D-5A09EC4E62A4', srcl:'IMF COFER',
+        thresholds:[
+          {c:'var(--red)',t:'<50% → dedolaryzacja strukturalna, nie cykliczna. Punkt bez powrotu'},
+          {c:'var(--amber)',t:'50-55% i spadający trend → erozja w toku, ale dolar wciąż dominuje'},
+          {c:'var(--green)',t:'>58% i stabilne → hegemonia dolara utrzymana'},
+        ]},
+      { id:'c_mbridge', name:'mBridge — wolumen transakcji',
+        why:'Alternatywna infrastruktura płatności bez dolara. Chiny, ZEA, Tajlandia. Gdy urośnie — nie wróci.',
+        freq:'KWARTALNIE', src:'https://www.bis.org/about/bisih/topics/cbdc/mcbdc_bridge.htm', srcl:'BIS mBridge',
+        thresholds:[
+          {c:'var(--red)',t:'>$100B/rok → alternatywna infrastruktura staje się realna, nie pilotażowa'},
+          {c:'var(--amber)',t:'Ekspansja geograficzna — nowe kraje → dedolaryzacja wchodzi w fazę infrastrukturalną'},
+        ]},
+      { id:'c_usd2', name:'USD 2.0 — CLARITY Act postęp',
+        why:'Regulacja stablecoinów = fundament tokenizowanego dolara. Kluczowe dla projektu PayPal Mafii.',
+        freq:'NA BIEŻĄCO', src:'https://www.congress.gov/search?q=%7B%22source%22%3A%22legislation%22%2C%22search%22%3A%22clarity+act%22%7D', srcl:'Congress.gov',
+        thresholds:[
+          {c:'var(--green)',t:'CLARITY Act podpisany → USD 2.0 infrastruktura legalna. Projekt wchodzi w fazę realizacji'},
+          {c:'var(--amber)',t:'Zablokowany w Senacie po midtermach → projekt opóźniony 2+ lata'},
+          {c:'var(--red)',t:'Odrzucony lub fundamentalnie zmieniony → projekt USD 2.0 wymaga przeprojektowania'},
+        ]},
+    ]
+  },
+];
+
+// ─── STATE ───────────────────────────────────────────────────
+
+let liveData = {};
+let cardState = {};
+
+function loadState() {
+  try { cardState = JSON.parse(localStorage.getItem('msd_cards') || '{}'); } catch(e) {}
+  const k = localStorage.getItem('msd_fredkey');
+  if (k) document.getElementById('fredKey').value = k;
+}
+
+function saveCardState() {
+  localStorage.setItem('msd_cards', JSON.stringify(cardState));
+}
+
+function getCard(id) {
+  return cardState[id] || { status:'none', notes:'', open:false };
+}
+
+// ─── RENDER ──────────────────────────────────────────────────
+
+function renderLiveRows() {
+  const wrap = document.getElementById('liveRows');
+  wrap.innerHTML = '';
+  LIVE_DEFS.forEach(def => {
+    const d = liveData[def.id];
+    const val = d ? d.value : null;
+    const chg = d ? d.change : null;
+    const fmt = d ? d.formatted : '—';
+    const chgFmt = chg != null ? ((chg >= 0 ? '+' : '') + chg.toFixed(2) + '%') : '—';
+
+    let alertCls = 'la-none', alertLbl = '—';
+    if (val != null && def.thresholds.length) {
+      for (const t of def.thresholds) {
+        if ((t.v < 0 && val < t.v) || (t.v >= 0 && val > t.v)) {
+          alertCls = t.cls;
+          alertLbl = t.lbl;
+          break;
+        }
+        if (t.v === 0 && val < 0) {
+          alertCls = t.cls;
+          alertLbl = t.lbl;
+          break;
+        }
+      }
+      if (alertLbl === '—') { alertCls = 'la-ok'; alertLbl = 'OK'; }
+    }
+
+    const barPct = val ? Math.min(100, Math.abs(val) / (def.id === 'btc' ? 1500 : def.id === 'gold' ? 80 : def.id === 'hy' ? 0.1 : 0.2) * 0.01) : 0;
+    const barCol = alertCls === 'la-alert' ? 'var(--red)' : alertCls === 'la-warn' ? 'var(--amber)' : 'var(--green)';
+
+    const row = document.createElement('div');
+    row.className = 'lt-row';
+    row.innerHTML = `
+      <span class="lt-name">${def.label}</span>
+      <span class="lt-val">${def.unit === '$' ? '$' : ''}${fmt}${def.unit === '%' ? '%' : ''}</span>
+      <span class="lt-chg ${chg == null ? '' : chg >= 0 ? 'up' : 'dn'}">${chgFmt}</span>
+      <div class="lt-bar-wrap"><div class="lt-bar" style="width:${barPct}%;background:${barCol}"></div></div>
+      <span class="lt-alert ${alertCls}">${alertLbl}</span>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function renderTiers() {
+  const root = document.getElementById('tiersRoot');
+  root.innerHTML = '';
+  TIERS.forEach(tier => {
+    const sec = document.createElement('div');
+    sec.className = 'tier ' + tier.cls;
+    sec.innerHTML = `
+      <div class="tier-hd">
+        <span class="tier-pill">${tier.pill}</span>
+        <span class="tier-name">${tier.name}</span>
+      </div>
+      <div class="cards" id="grid_${tier.cls}"></div>
+    `;
+    root.appendChild(sec);
+    const grid = sec.querySelector('.cards');
+    tier.cards.forEach(c => grid.appendChild(makeCard(c)));
+  });
+}
+
+function makeCard(c) {
+  const s = getCard(c.id);
+  const statusMap = { none:'BRAK DANYCH', ok:'✓ OK', warn:'⚠ UWAGA', alert:'✕ ALERT' };
+  const sCls = { none:'s-none', ok:'s-ok', warn:'s-warn', alert:'s-alert' };
+  const cardCls = s.status !== 'none' ? 'card-status-' + s.status : '';
+
+  const el = document.createElement('div');
+  el.className = `card ${cardCls} ${s.open ? 'open' : ''}`;
+  el.id = 'card_' + c.id;
+
+  el.innerHTML = `
+    <div class="ct">
+      <div class="cn">${c.name}</div>
+      <button class="cs ${sCls[s.status]}" id="sbtn_${c.id}"
+        onclick="event.stopPropagation();cycleStatus('${c.id}')">${statusMap[s.status]}</button>
+    </div>
+    <div class="cw">${c.why}</div>
+    <div class="hint">▸ rozwiń progi i notatkę</div>
+    <div class="expand-body">
+      <div class="thresholds">
+        ${c.thresholds.map(t => `
+          <div class="thr">
+            <div class="thr-dot" style="background:${t.c}"></div>
+            <div class="thr-txt">${t.t}</div>
+          </div>`).join('')}
+      </div>
+      <div class="note-wrap">
+        <div class="note-label">NOTATKA</div>
+        <textarea class="note-ta" placeholder="Obserwacja / kontekst..."
+          oninput="saveNote('${c.id}',this.value)">${s.notes || ''}</textarea>
+      </div>
+    </div>
+    <div class="cf">
+      <span class="cf-freq">${c.freq}</span>
+      <a class="cf-src" href="${c.src}" target="_blank">${c.srcl} ↗</a>
+    </div>
+  `;
+
+  el.addEventListener('click', e => {
+    if (['BUTTON','A','TEXTAREA'].includes(e.target.tagName)) return;
+    toggleCard(c.id);
+  });
+
+  return el;
+}
+
+function toggleCard(id) {
+  const s = getCard(id);
+  s.open = !s.open;
+  cardState[id] = s;
+  saveCardState();
+  const el = document.getElementById('card_' + id);
+  if (el) el.classList.toggle('open', s.open);
+}
+
+function cycleStatus(id) {
+  const s = getCard(id);
+  const cycle = ['none','ok','warn','alert'];
+  s.status = cycle[(cycle.indexOf(s.status) + 1) % cycle.length];
+  cardState[id] = s;
+  saveCardState();
+  refreshCardStatus(id);
+  updateSummary();
+  updateTs();
+}
+
+function refreshCardStatus(id) {
+  const s = getCard(id);
+  const btn = document.getElementById('sbtn_' + id);
+  const card = document.getElementById('card_' + id);
+  if (!btn || !card) return;
+  const statusMap = { none:'BRAK DANYCH', ok:'✓ OK', warn:'⚠ UWAGA', alert:'✕ ALERT' };
+  const sCls = { none:'s-none', ok:'s-ok', warn:'s-warn', alert:'s-alert' };
+  btn.className = 'cs ' + sCls[s.status];
+  btn.textContent = statusMap[s.status];
+  card.className = card.className.replace(/card-status-\w+/g, '').trim();
+  if (s.status !== 'none') card.classList.add('card-status-' + s.status);
+}
+
+function saveNote(id, val) {
+  const s = getCard(id);
+  s.notes = val;
+  cardState[id] = s;
+  saveCardState();
+  updateTs();
+}
+
+function updateSummary() {
+  let a=0,w=0,o=0,n=0;
+  TIERS.forEach(t => t.cards.forEach(c => {
+    const s = getCard(c.id).status;
+    if (s==='alert') a++;
+    else if (s==='warn') w++;
+    else if (s==='ok') o++;
+    else n++;
+  }));
+  document.getElementById('cntA').textContent = a;
+  document.getElementById('cntW').textContent = w;
+  document.getElementById('cntO').textContent = o;
+  document.getElementById('cntN').textContent = n;
+}
+
+function updateTs() {
+  const ts = new Date().toLocaleString('pl-PL');
+  document.getElementById('sTs').textContent = 'Ostatnia aktualizacja: ' + ts;
+}
+
+// ─── LIVE DATA FETCH ─────────────────────────────────────────
+
+async function fetchBTC() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const d = await r.json();
+    if (d.bitcoin) {
+      const v = d.bitcoin.usd;
+      const c = d.bitcoin.usd_24h_change;
+      liveData.btc = { value:v, change:c, formatted: v.toLocaleString('en-US',{maximumFractionDigits:0}) };
+      document.getElementById('hBtc').textContent = '$' + liveData.btc.formatted;
+      const hc = document.getElementById('hBtcC');
+      hc.textContent = (c>=0?'+':'') + c.toFixed(2) + '%';
+      hc.className = 'live-chg ' + (c>=0?'up':'dn');
+    }
+  } catch(e) {}
+}
+
+async function fetchGold() {
+  try {
+    const r = await fetch('https://api.metals.live/v1/spot/gold');
+    const d = await r.json();
+    if (d && d.price) {
+      const v = d.price;
+      liveData.gold = { value:v, change:null, formatted: Math.round(v).toLocaleString('en-US') };
+      document.getElementById('hGold').textContent = '$' + liveData.gold.formatted;
+    }
+  } catch(e) {
+    liveData.gold = { value:null, change:null, formatted:'—' };
+  }
+}
+
+async function fetchFRED(series, key) {
+  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${series}&api_key=${key}&sort_order=desc&limit=5&file_type=json`;
+  const r = await fetch(url);
+  const d = await r.json();
+  const obs = d.observations?.filter(o => o.value !== '.') || [];
+  if (obs.length === 0) return null;
+  return parseFloat(obs[0].value);
+}
+
+async function fetchAllFRED() {
+  const key = document.getElementById('fredKey').value.trim();
+  if (!key) return;
+  try {
+    const [y10, y2, hy] = await Promise.all([
+      fetchFRED('DGS10', key),
+      fetchFRED('DGS2', key),
+      fetchFRED('BAMLH0A0HYM2EY', key),
+    ]);
+    if (y10 != null) {
+      liveData.y10 = { value:y10, change:null, formatted: y10.toFixed(2) };
+      document.getElementById('h10y').textContent = y10.toFixed(2) + '%';
+    }
+    if (y2 != null) {
+      liveData.y2 = { value:y2, change:null, formatted: y2.toFixed(2) };
+    }
+    if (y10 != null && y2 != null) {
+      const spread = +(y10 - y2).toFixed(2);
+      liveData.spread = { value:spread, change:null, formatted: spread.toFixed(2), computed:true };
+    }
+    if (hy != null) {
+      liveData.hy = { value:hy, change:null, formatted: hy.toFixed(2) };
+      document.getElementById('hHy').textContent = hy.toFixed(2) + '%';
+    }
+  } catch(e) {
+    console.warn('FRED error:', e.message);
+  }
+}
+
+async function refreshAll() {
+  document.getElementById('ltTs').textContent = 'odświeżanie...';
+  await Promise.allSettled([fetchBTC(), fetchGold(), fetchAllFRED()]);
+  renderLiveRows();
+  document.getElementById('ltTs').textContent = 'live · ' + new Date().toLocaleTimeString('pl-PL');
+}
+
+function saveKeyAndRefresh() {
+  const k = document.getElementById('fredKey').value.trim();
+  if (k) localStorage.setItem('msd_fredkey', k);
+  refreshAll();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+
+function init() {
+  loadState();
+  renderLiveRows();
+  renderTiers();
+  updateSummary();
+  updateTs();
+  refreshAll();
+  setInterval(refreshAll, 5 * 60 * 1000); // co 5 minut
+}
+
+init();
+</script>
+</body>
+</html>
