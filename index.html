@@ -915,22 +915,38 @@ async function fetchBTC() {
 
 async function fetchGold() {
   try {
-    const r = await fetch('https://api.metals.live/v1/spot/gold');
+    // CoinGecko obsługuje XAU (złoto) przez vs_currencies
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether-gold&vs_currencies=usd');
     const d = await r.json();
-    if (d && d.price) {
-      const v = d.price;
+    // Alternatywnie użyj innego endpointu jeśli tether-gold nie działa
+    if (d['tether-gold'] && d['tether-gold'].usd) {
+      const v = d['tether-gold'].usd;
       liveData.gold = { value:v, change:null, formatted: Math.round(v).toLocaleString('en-US') };
       document.getElementById('hGold').textContent = '$' + liveData.gold.formatted;
+      return;
     }
-  } catch(e) {
-    liveData.gold = { value:null, change:null, formatted:'—' };
-  }
+  } catch(e) {}
+  // Fallback: frankfurter.app dla XAU
+  try {
+    const r2 = await fetch('https://api.frankfurter.app/latest?from=XAU&to=USD');
+    const d2 = await r2.json();
+    if (d2.rates && d2.rates.USD) {
+      const v = d2.rates.USD;
+      liveData.gold = { value:v, change:null, formatted: Math.round(v).toLocaleString('en-US') };
+      document.getElementById('hGold').textContent = '$' + liveData.gold.formatted;
+      return;
+    }
+  } catch(e) {}
+  liveData.gold = { value:null, change:null, formatted:'sprawdź ↗' };
 }
 
 async function fetchFRED(series, key) {
-  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${series}&api_key=${key}&sort_order=desc&limit=5&file_type=json`;
-  const r = await fetch(url);
-  const d = await r.json();
+  // FRED blokuje CORS — używamy allorigins.win jako bezpłatnego proxy
+  const fredUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=${series}&api_key=${key}&sort_order=desc&limit=5&file_type=json`;
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(fredUrl)}`;
+  const r = await fetch(proxyUrl);
+  const wrapper = await r.json();
+  const d = JSON.parse(wrapper.contents);
   const obs = d.observations?.filter(o => o.value !== '.') || [];
   if (obs.length === 0) return null;
   return parseFloat(obs[0].value);
