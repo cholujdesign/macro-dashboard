@@ -914,42 +914,62 @@ async function fetchBTC() {
 }
 
 async function fetchGold() {
+  // Próba 1: pax-gold (PAX Gold) na CoinGecko — 1 token = 1 uncja złota
   try {
-    // CoinGecko obsługuje XAU (złoto) przez vs_currencies
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether-gold&vs_currencies=usd');
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold,tether-gold&vs_currencies=usd');
     const d = await r.json();
-    // Alternatywnie użyj innego endpointu jeśli tether-gold nie działa
-    if (d['tether-gold'] && d['tether-gold'].usd) {
-      const v = d['tether-gold'].usd;
+    const v = d['pax-gold']?.usd || d['tether-gold']?.usd;
+    if (v) {
       liveData.gold = { value:v, change:null, formatted: Math.round(v).toLocaleString('en-US') };
       document.getElementById('hGold').textContent = '$' + liveData.gold.formatted;
       return;
     }
   } catch(e) {}
-  // Fallback: frankfurter.app dla XAU
+  // Próba 2: frankfurter.app — kurs XAU/USD
   try {
-    const r2 = await fetch('https://api.frankfurter.app/latest?from=XAU&to=USD');
-    const d2 = await r2.json();
-    if (d2.rates && d2.rates.USD) {
-      const v = d2.rates.USD;
+    const r = await fetch('https://api.frankfurter.app/latest?from=XAU&to=USD');
+    const d = await r.json();
+    if (d.rates?.USD) {
+      const v = d.rates.USD;
       liveData.gold = { value:v, change:null, formatted: Math.round(v).toLocaleString('en-US') };
       document.getElementById('hGold').textContent = '$' + liveData.gold.formatted;
       return;
     }
   } catch(e) {}
-  liveData.gold = { value:null, change:null, formatted:'sprawdź ↗' };
+  // Próba 3: open.er-api.com
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/XAU');
+    const d = await r.json();
+    if (d.rates?.USD) {
+      const v = d.rates.USD;
+      liveData.gold = { value:v, change:null, formatted: Math.round(v).toLocaleString('en-US') };
+      document.getElementById('hGold').textContent = '$' + liveData.gold.formatted;
+      return;
+    }
+  } catch(e) {}
+  liveData.gold = { value:null, change:null, formatted:'—' };
+  document.getElementById('hGold').textContent = '—';
 }
 
 async function fetchFRED(series, key) {
-  // FRED blokuje CORS — używamy allorigins.win jako bezpłatnego proxy
+  // FRED nie ma CORS — używamy corsproxy.io
   const fredUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=${series}&api_key=${key}&sort_order=desc&limit=5&file_type=json`;
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(fredUrl)}`;
-  const r = await fetch(proxyUrl);
-  const wrapper = await r.json();
-  const d = JSON.parse(wrapper.contents);
-  const obs = d.observations?.filter(o => o.value !== '.') || [];
-  if (obs.length === 0) return null;
-  return parseFloat(obs[0].value);
+  // Próba 1: corsproxy.io
+  try {
+    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(fredUrl)}`);
+    const d = await r.json();
+    const obs = d.observations?.filter(o => o.value !== '.') || [];
+    if (obs.length > 0) return parseFloat(obs[0].value);
+  } catch(e) {}
+  // Próba 2: allorigins.win jako backup
+  try {
+    const r2 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(fredUrl)}`);
+    const w = await r2.json();
+    const d2 = JSON.parse(w.contents);
+    const obs2 = d2.observations?.filter(o => o.value !== '.') || [];
+    if (obs2.length > 0) return parseFloat(obs2[0].value);
+  } catch(e) {}
+  return null;
 }
 
 async function fetchAllFRED() {
