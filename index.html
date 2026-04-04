@@ -381,6 +381,140 @@ body {
   .lt-val { min-width: 80px; font-size: 12px; }
   .apibar-note { display: none; }
 }
+
+/* ─── LEGEND ─────────────────────────────────── */
+.legend-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+.legend-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.leg-title {
+  font-size: 9px; color: var(--amber);
+  letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+}
+
+.leg-toggle {
+  font-size: 9px; color: var(--dim); background: none; border: none;
+  font-family: 'JetBrains Mono', monospace; cursor: pointer;
+  letter-spacing: 1px; text-transform: uppercase;
+  transition: color .2s;
+}
+.leg-toggle:hover { color: var(--text); }
+
+.legend-body { display: none; padding: 16px; }
+.legend-body.open { display: block; }
+
+.leg-section { margin-bottom: 18px; }
+
+.leg-sh {
+  font-size: 8px; color: var(--muted);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 8px; padding-bottom: 5px;
+  border-bottom: 1px solid var(--line);
+}
+
+.leg-text {
+  font-size: 11px; color: var(--dim); line-height: 1.6;
+  font-family: 'Syne', sans-serif;
+}
+
+.leg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.leg-card {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+
+.leg-ch {
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 8px; padding: 3px 7px; border-radius: 2px;
+  display: inline-block;
+}
+
+.t1 .leg-ch, .leg-ch.t1 { background: var(--red2); color: var(--red); border: 1px solid var(--red); }
+.t2 .leg-ch, .leg-ch.t2 { background: var(--amber2); color: var(--amber); border: 1px solid var(--amber); }
+.t3 .leg-ch, .leg-ch.t3 { background: var(--blue2); color: var(--blue); border: 1px solid var(--blue); }
+.t4 .leg-ch, .leg-ch.t4 { background: #1a2f1a; color: var(--green); border: 1px solid var(--green); }
+
+.leg-item {
+  display: flex; gap: 7px; align-items: flex-start;
+  font-size: 10px; color: var(--dim); margin-bottom: 5px;
+  font-family: 'Syne', sans-serif; line-height: 1.4;
+}
+
+.leg-item b { color: var(--text); }
+
+.leg-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 4px;
+}
+
+.leg-implications { }
+
+.leg-assets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.leg-asset {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+
+.leg-asset-name {
+  font-size: 10px; font-weight: 700; color: var(--bright);
+  letter-spacing: 1px; margin-bottom: 5px;
+}
+
+.leg-asset-desc {
+  font-size: 10px; color: var(--dim); line-height: 1.5;
+  font-family: 'Syne', sans-serif; margin-bottom: 6px;
+}
+
+.leg-asset-signal {
+  font-size: 9px; color: var(--green); letter-spacing: .5px;
+  font-weight: 600;
+}
+
+.leg-questions { }
+
+.leg-q {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 7px 0; border-bottom: 1px solid var(--line);
+  font-size: 11px; color: var(--dim);
+  font-family: 'Syne', sans-serif; line-height: 1.4;
+}
+
+.leg-q:last-child { border-bottom: none; }
+
+.leg-qn {
+  font-size: 9px; font-weight: 700; color: var(--amber);
+  letter-spacing: 1px; flex-shrink: 0; margin-top: 1px;
+}
+
+
 </style>
 </head>
 <body>
@@ -452,6 +586,104 @@ body {
       <span class="lt-ts" id="ltTs">odświeżanie...</span>
     </div>
     <div id="liveRows"></div>
+  </div>
+
+  <!-- LEGENDA -->
+  <div class="legend-wrap">
+    <div class="legend-hd" onclick="toggleLegend()">
+      <span class="leg-title">⊞ LEGENDA — KONTEKST ANALITYCZNY</span>
+      <button class="leg-toggle" id="legToggle">▸ ROZWIŃ</button>
+    </div>
+    <div class="legend-body" id="legendBody">
+
+      <div class="leg-section">
+        <div class="leg-sh">TEZA CENTRALNA</div>
+        <div class="leg-text">Zachód wchodzi w fazę kontrolowanej lub niekontrolowanej przebudowy systemu gdzie koszty ponoszą szerokie warstwy społeczeństwa a beneficjentami jest nowa klasa technologicznych oligarchów — którzy jednocześnie są rozgrywani przez zewnętrznych aktorów których nie doceniają i przez długoterminowe trendy których nie kontrolują. Rewolucjoniści 2026 są beneficjentami systemu który udają że obalają.</div>
+      </div>
+
+      <div class="leg-grid">
+        <div class="leg-card">
+          <div class="leg-ch t1">TIER 1 — KRYTYCZNE</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>10Y Yield &gt;5%</b> — stagflacja, Fed traci kontrolę nad narracją. &gt;5.5% = pętla długu</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>DXY słaby + yield rosnący jednocześnie</b> — sprzedają obligacje I walutę. Koniec hegemonii dolara</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>Spread ujemny</b> — krzywa odwrócona = recesja w 6-12 miesięcy. Precedens: każda recesja od 1970</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span><b>Gold/SP500 trend rosnący</b> — złoto bije akcje = niepewność systemowa nad wzrostem korporacyjnym</div>
+        </div>
+
+        <div class="leg-card">
+          <div class="leg-ch t2">TIER 2 — POLITYCZNE</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>Warsh potwierdzony</b> — Fed traci niezależność instytucjonalną. Największy sygnał dla złota od 1971</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span><b>Iran impas przez lato</b> — stagflacja długoterminowa. Benzyna 5$+ niszczy GOP przed midtermami XI 2026</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>Midtermy GOP wygrywa przy 55%+ głosów DEM</b> — gerrymandering na danych DOGE zadziałał. System przestał być demokracją</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span><b>Epstein — PayPal Mafia głębiej</b> — projekt USD 2.0 traci legitymizację u własnej bazy</div>
+        </div>
+
+        <div class="leg-card">
+          <div class="leg-ch t3">TIER 3 — RYNKOWE</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>HY spread &gt;600bps</b> — bankructwa korporacyjne w drodze. Wyprzedza recesję o 6-9 miesięcy</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>BTC dominance spada &lt;40%</b> — altseason, retail FOMO, szczyt cyklu. Realizuj zyski</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--green)"></span><b>BTC NUPL ujemny</b> — kapitulacja = historyczny dołek. Akumuluj (halving 2028 → szczyt 2029-30)</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>Gold/Oil rośnie dramatycznie</b> — erozja dolara strukturalna, nie tylko kryzys energetyczny</div>
+        </div>
+
+        <div class="leg-card">
+          <div class="leg-ch t4">TIER 4-5 — DŁUGOTERM.</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>Yuan gwałtowna dewaluacja</b> — Chiny wybrały decoupling. Koniec obejść przez warstwy pośrednie</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span><b>Chiny sprzedają Treasuries &gt;10B/mies.</b> — strategiczne wyjście z dolara przez wiele miesięcy</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--red)"></span><b>COFER &lt;50%</b> — dedolaryzacja strukturalna nieodwracalna. USD 2.0 przychodzi za późno</div>
+          <div class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span><b>mBridge &gt;100B/rok</b> — alternatywna infrastruktura płatności bez dolara staje się realna</div>
+        </div>
+      </div>
+
+      <div class="leg-section leg-implications">
+        <div class="leg-sh">IMPLIKACJE DLA AKTYWÓW</div>
+        <div class="leg-assets">
+          <div class="leg-asset">
+            <div class="leg-asset-name">BTC</div>
+            <div class="leg-asset-desc">Strategic Reserve USA = teza strukturalna. Dołek cyklu: jesień 2026. Szczyt kolejny: 2029-30 przy Fed pivotuje + halving 2028. Cykl halvingowy i monetarny nakładają się.</div>
+            <div class="leg-asset-signal">Wchodź gdy NUPL &lt;0.25 i dominance &gt;60%</div>
+          </div>
+          <div class="leg-asset">
+            <div class="leg-asset-name">ZŁOTO</div>
+            <div class="leg-asset-desc">Trzy fale: spike przy Iranie → korekta przy "dealu" → kolejna fala gdy rynek wyceni Warsha. Zbyt drogie złoto zabija stary pieniądz ale sygnalizuje że system jest chory, nie że wygrałeś.</div>
+            <div class="leg-asset-signal">Korekta po Iranie = okazja kupna fizycznego</div>
+          </div>
+          <div class="leg-asset">
+            <div class="leg-asset-name">ENERGIA</div>
+            <div class="leg-asset-desc">XLE +38% od początku 2026. Infrastruktura LNG, spółki z niskim kosztem wydobycia, dywidenda 5-8%. Taktyczny trade przy eskalacji — sprzedaj przy "dealu" Trumpa.</div>
+            <div class="leg-asset-signal" style="color:var(--amber)">Trade, nie pozycja dekadowa</div>
+          </div>
+          <div class="leg-asset">
+            <div class="leg-asset-name">ZBROJENIA EU</div>
+            <div class="leg-asset-desc">Pewnik niezależny od Iranu i Trumpa. Europa zbroi się przez całą dekadę. Rheinmetall, Leonardo, KNDS. Wieloletni kontrakt rządowy — najczystszy długoterminowy long z tej rozmowy.</div>
+            <div class="leg-asset-signal">Trzymaj przez całą dekadę</div>
+          </div>
+          <div class="leg-asset">
+            <div class="leg-asset-name">OBLIGACJE</div>
+            <div class="leg-asset-desc">Stagflacja + Warsh + rosnący dług USA = strukturalnie złe środowisko dla fixed income. Krótkie duracje lub zero. Obligacje polskie szczególnie ryzykowne — lokalna inflacja + ryzyko geopolityczne.</div>
+            <div class="leg-asset-signal" style="color:var(--red)">Unikaj długich duration</div>
+          </div>
+          <div class="leg-asset">
+            <div class="leg-asset-name">SPACEX IPO</div>
+            <div class="leg-asset-desc">Czerwiec 2026. Wycena 1.75T = 87x przychodów. Retail 30% emisji — mechanizm transferu kapitału od retail do Muska i wczesnych inwestorów. Poczekaj na post-lockup dip.</div>
+            <div class="leg-asset-signal" style="color:var(--amber)">Wejdź grudzień 2026 po lock-up expiry</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leg-section">
+        <div class="leg-sh">KLUCZOWE PYTANIA KTÓRE DECYDUJĄ O KIERUNKU</div>
+        <div class="leg-questions">
+          <div class="leg-q"><span class="leg-qn">01</span>Czy Iran da Trumpowi narrację zwycięstwa przed czerwcem — czy nie ma w tym interesu i przedłuża impas?</div>
+          <div class="leg-q"><span class="leg-qn">02</span>Czy Warsh zostanie potwierdzony przed majem — czy Powell zostaje i Fed jest formalnie niezależny?</div>
+          <div class="leg-q"><span class="leg-qn">03</span>Czy gerrymandering na danych DOGE wytrzyma falę wyborczą w listopadzie 2026?</div>
+          <div class="leg-q"><span class="leg-qn">04</span>Czy USD 2.0 (CLARITY Act) jest gotowy zanim stary dolar zbyt mocno się posypie?</div>
+          <div class="leg-q"><span class="leg-qn">05</span>Czy świat potrzebuje USD 2.0 — czy woli system bez hegemona (mBridge + złoto + lokalne waluty)?</div>
+          <div class="leg-q"><span class="leg-qn">06</span>Czy PayPal Mafia ma 12-18 miesięcy żeby zamknąć kluczowe pozycje — czy Iran i midtermy skracają okno?</div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- SIGNAL TIERS -->
@@ -1015,6 +1247,14 @@ function saveKeyAndRefresh() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────
+
+function toggleLegend() {
+  const body = document.getElementById('legendBody');
+  const btn = document.getElementById('legToggle');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  btn.textContent = isOpen ? '▸ ROZWIŃ' : '▾ ZWIŃ';
+}
 
 function init() {
   loadState();
